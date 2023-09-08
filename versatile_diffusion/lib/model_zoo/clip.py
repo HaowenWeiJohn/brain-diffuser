@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from functools import partial
-from lib.model_zoo.common.get_model import register
+from versatile_diffusion.lib.model_zoo.common.get_model import register
 
 version = '0'
 symbol = 'clip'

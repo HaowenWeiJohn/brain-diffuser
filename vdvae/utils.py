@@ -7,7 +7,7 @@ import torch
 import time
 import subprocess
 import torch.distributed as dist
-
+from mpi4py import MPI
 
 def allreduce(x, average):
     if mpi_size() > 1:

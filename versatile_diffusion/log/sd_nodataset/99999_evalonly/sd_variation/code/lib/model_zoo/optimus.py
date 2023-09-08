@@ -6,7 +6,7 @@ import numpy as np
 import numpy.random as npr
 import copy
 
-from lib.model_zoo.common.get_model import get_model, register
+from model_zoo.common.get_model import get_model, register
 from lib.model_zoo.common import utils
 
 from .optimus_models.tokenization_gpt2 import GPT2Tokenizer

@@ -14,11 +14,11 @@ from datetime import datetime
 from easydict import EasyDict as edict
 from collections import OrderedDict
 
-from lib.cfg_holder import cfg_unique_holder as cfguh
-from lib.data_factory import get_dataset, get_sampler, collate
-from lib.model_zoo import \
+from versatile_diffusion.lib.cfg_holder import cfg_unique_holder as cfguh
+from versatile_diffusion.lib.data_factory import get_dataset, get_sampler, collate
+from versatile_diffusion.lib.model_zoo import \
     get_model, get_optimizer, get_scheduler
-from lib.log_service import print_log
+from versatile_diffusion.lib.log_service import print_log
 
 from ..utils import train as train_base
 from ..utils import eval as eval_base
