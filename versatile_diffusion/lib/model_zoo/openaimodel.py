@@ -14,7 +14,7 @@ from .diffusion_utils import \
 
 from .attention import SpatialTransformer
 
-from lib.model_zoo.common.get_model import get_model, register
+from versatile_diffusion.lib.model_zoo.common.get_model import get_model, register
 
 version = '0'
 symbol = 'openai'

@@ -7,7 +7,7 @@ import nibabel as nib
 
 import argparse
 parser = argparse.ArgumentParser(description='Argument Parser')
-parser.add_argument("-sub", "--sub",help="Subject Number",default=1)
+parser.add_argument("-sub", "--sub",help="Subject Number",default=7)
 args = parser.parse_args()
 sub=int(args.sub)
 assert sub in [1,2,5,7]

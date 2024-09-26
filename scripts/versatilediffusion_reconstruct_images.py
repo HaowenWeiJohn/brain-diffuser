@@ -10,15 +10,15 @@ import numpy.random as npr
 
 import torch
 import torchvision.transforms as tvtrans
-from lib.cfg_helper import model_cfg_bank
-from lib.model_zoo import get_model
-from lib.model_zoo.ddim_vd import DDIMSampler_VD
-from lib.experiments.sd_default import color_adjust, auto_merge_imlist
+from versatile_diffusion.lib.cfg_helper import model_cfg_bank
+from versatile_diffusion.lib.model_zoo import get_model
+from versatile_diffusion.lib.model_zoo.ddim_vd import DDIMSampler_VD
+from versatile_diffusion.lib.experiments.sd_default import color_adjust, auto_merge_imlist
 from torch.utils.data import DataLoader, Dataset
 
-from lib.model_zoo.vd import VD
-from lib.cfg_holder import cfg_unique_holder as cfguh
-from lib.cfg_helper import get_command_line_args, cfg_initiates, load_cfg_yaml
+from versatile_diffusion.lib.model_zoo.vd import VD
+from versatile_diffusion.lib.cfg_holder import cfg_unique_holder as cfguh
+from versatile_diffusion.lib.cfg_helper import get_command_line_args, cfg_initiates, load_cfg_yaml
 import matplotlib.pyplot as plt
 from skimage.transform import resize, downscale_local_mean
 
@@ -56,7 +56,7 @@ def regularize_image(x):
 
 cfgm_name = 'vd_noema'
 sampler = DDIMSampler_VD
-pth = 'versatile_diffusion/pretrained/vd-four-flow-v1-0-fp16-deprecated.pth'
+pth = '../versatile_diffusion/pretrained/vd-four-flow-v1-0-fp16-deprecated.pth'
 cfgm = model_cfg_bank()(cfgm_name)
 net = get_model()(cfgm)
 sd = torch.load(pth, map_location='cpu')
@@ -73,10 +73,10 @@ sampler = sampler(net)
 #sampler.model.cuda(1)
 batch_size = 1
 
-pred_text = np.load('data/predicted_features/subj{:02d}/nsd_cliptext_predtest_nsdgeneral.npy'.format(sub))
+pred_text = np.load('../data/predicted_features/subj{:02d}/nsd_cliptext_predtest_nsdgeneral.npy'.format(sub))
 pred_text = torch.tensor(pred_text).half().cuda(1)
 
-pred_vision = np.load('data/predicted_features/subj{:02d}/nsd_clipvision_predtest_nsdgeneral.npy'.format(sub))
+pred_vision = np.load('../data/predicted_features/subj{:02d}/nsd_clipvision_predtest_nsdgeneral.npy'.format(sub))
 pred_vision = torch.tensor(pred_vision).half().cuda(1)
 
 
@@ -91,7 +91,7 @@ net.autokl.half()
 torch.manual_seed(0)
 for im_id in range(len(pred_vision)):
 
-    zim = Image.open('results/vdvae/subj{:02d}/{}.png'.format(sub,im_id))
+    zim = Image.open('../results/vdvae/subj{:02d}/{}.png'.format(sub,im_id))
    
     zim = regularize_image(zim)
     zin = zim*2 - 1
@@ -161,6 +161,6 @@ for im_id in range(len(pred_vision)):
         x = [tvtrans.ToPILImage()(xi) for xi in x]
     
 
-    x[0].save('results/versatile_diffusion/subj{:02d}/{}.png'.format(sub,im_id))
+    x[0].save('../results/versatile_diffusion/subj{:02d}/{}.png'.format(sub,im_id))
       
 

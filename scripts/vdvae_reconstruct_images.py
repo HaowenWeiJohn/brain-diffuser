@@ -8,21 +8,21 @@ import argparse
 import os
 import json
 import subprocess
-from hps import Hyperparams, parse_args_and_update_hparams, add_vae_arguments
-from utils import (logger,
+from vdvae.hps import Hyperparams, parse_args_and_update_hparams, add_vae_arguments
+from vdvae.utils import (logger,
                    local_mpi_rank,
                    mpi_size,
                    maybe_download,
                    mpi_rank)
-from data import mkdir_p
+from vdvae.data import mkdir_p
 from contextlib import contextmanager
 import torch.distributed as dist
 #from apex.optimizers import FusedAdam as AdamW
-from vae import VAE
+from vdvae.vae import VAE
 from torch.nn.parallel.distributed import DistributedDataParallel
-from train_helpers import restore_params
-from image_utils import *
-from model_utils import *
+from vdvae.train_helpers import restore_params
+from vdvae.image_utils import *
+from vdvae.model_utils import *
 from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import torchvision.transforms as T
@@ -39,7 +39,7 @@ batch_size=int(args.bs)
 
 print('Libs imported')
 
-H = {'image_size': 64, 'image_channels': 3,'seed': 0, 'port': 29500, 'save_dir': './saved_models/test', 'data_root': './', 'desc': 'test', 'hparam_sets': 'imagenet64', 'restore_path': 'imagenet64-iter-1600000-model.th', 'restore_ema_path': 'vdvae/model/imagenet64-iter-1600000-model-ema.th', 'restore_log_path': 'imagenet64-iter-1600000-log.jsonl', 'restore_optimizer_path': 'imagenet64-iter-1600000-opt.th', 'dataset': 'imagenet64', 'ema_rate': 0.999, 'enc_blocks': '64x11,64d2,32x20,32d2,16x9,16d2,8x8,8d2,4x7,4d4,1x5', 'dec_blocks': '1x2,4m1,4x3,8m4,8x7,16m8,16x15,32m16,32x31,64m32,64x12', 'zdim': 16, 'width': 512, 'custom_width_str': '', 'bottleneck_multiple': 0.25, 'no_bias_above': 64, 'scale_encblock': False, 'test_eval': True, 'warmup_iters': 100, 'num_mixtures': 10, 'grad_clip': 220.0, 'skip_threshold': 380.0, 'lr': 0.00015, 'lr_prior': 0.00015, 'wd': 0.01, 'wd_prior': 0.0, 'num_epochs': 10000, 'n_batch': 4, 'adam_beta1': 0.9, 'adam_beta2': 0.9, 'temperature': 1.0, 'iters_per_ckpt': 25000, 'iters_per_print': 1000, 'iters_per_save': 10000, 'iters_per_images': 10000, 'epochs_per_eval': 1, 'epochs_per_probe': None, 'epochs_per_eval_save': 1, 'num_images_visualize': 8, 'num_variables_visualize': 6, 'num_temperatures_visualize': 3, 'mpi_size': 1, 'local_rank': 0, 'rank': 0, 'logdir': './saved_models/test/log'}
+H = {'image_size': 64, 'image_channels': 3,'seed': 0, 'port': 29500, 'save_dir': './saved_models/test', 'data_root': './', 'desc': 'test', 'hparam_sets': 'imagenet64', 'restore_path': 'imagenet64-iter-1600000-model.th', 'restore_ema_path': '../vdvae/model/imagenet64-iter-1600000-model-ema.th', 'restore_log_path': 'imagenet64-iter-1600000-log.jsonl', 'restore_optimizer_path': 'imagenet64-iter-1600000-opt.th', 'dataset': 'imagenet64', 'ema_rate': 0.999, 'enc_blocks': '64x11,64d2,32x20,32d2,16x9,16d2,8x8,8d2,4x7,4d4,1x5', 'dec_blocks': '1x2,4m1,4x3,8m4,8x7,16m8,16x15,32m16,32x31,64m32,64x12', 'zdim': 16, 'width': 512, 'custom_width_str': '', 'bottleneck_multiple': 0.25, 'no_bias_above': 64, 'scale_encblock': False, 'test_eval': True, 'warmup_iters': 100, 'num_mixtures': 10, 'grad_clip': 220.0, 'skip_threshold': 380.0, 'lr': 0.00015, 'lr_prior': 0.00015, 'wd': 0.01, 'wd_prior': 0.0, 'num_epochs': 10000, 'n_batch': 4, 'adam_beta1': 0.9, 'adam_beta2': 0.9, 'temperature': 1.0, 'iters_per_ckpt': 25000, 'iters_per_print': 1000, 'iters_per_save': 10000, 'iters_per_images': 10000, 'epochs_per_eval': 1, 'epochs_per_probe': None, 'epochs_per_eval_save': 1, 'num_images_visualize': 8, 'num_variables_visualize': 6, 'num_temperatures_visualize': 3, 'mpi_size': 1, 'local_rank': 0, 'rank': 0, 'logdir': './saved_models/test/log'}
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
     __getattr__ = dict.get
@@ -73,7 +73,7 @@ class batch_generator_external_images(Dataset):
 
 
 
-image_path = 'data/processed_data/subj{:02d}/nsd_test_stim_sub{}.npy'.format(sub,sub)
+image_path = '../data/processed_data/subj{:02d}/nsd_test_stim_sub{}.npy'.format(sub,sub)
 test_images = batch_generator_external_images(data_path = image_path)
 testloader = DataLoader(test_images,batch_size,shuffle=False)
 
@@ -94,7 +94,7 @@ for i,x in enumerate(testloader):
         #imshow(imgrid(test_images[i*batch_size : (i+1)*batch_size], cols=batch_size,pad=20))
 test_latents = np.concatenate(test_latents)      
 
-pred_latents = np.load('data/predicted_features/subj{:02d}/nsd_vdvae_nsdgeneral_pred_sub{}_31l_alpha50k.npy'.format(sub,sub))
+pred_latents = np.load('../data/predicted_features/subj{:02d}/nsd_vdvae_nsdgeneral_pred_sub{}_31l_alpha50k.npy'.format(sub,sub))
 ref_latent = stats
 
 # Transfor latents from flattened representation to hierarchical
@@ -133,6 +133,6 @@ for i in range(int(np.ceil(len(test_images)/batch_size))):
       im = sample_from_latent[j]
       im = Image.fromarray(im)
       im = im.resize((512,512),resample=3)
-      im.save('results/vdvae/subj{:02d}/{}.png'.format(sub,i*batch_size+j))
+      im.save('../results/vdvae/subj{:02d}/{}.png'.format(sub,i*batch_size+j))
       
 

@@ -6,8 +6,8 @@ import numpy.random as npr
 import copy
 from functools import partial
 from contextlib import contextmanager
-from lib.model_zoo.common.get_model import get_model, register
-from lib.log_service import print_log
+from versatile_diffusion.lib.model_zoo.common.get_model import get_model, register
+from versatile_diffusion.lib.log_service import print_log
 
 version = '0'
 symbol = 'sd'

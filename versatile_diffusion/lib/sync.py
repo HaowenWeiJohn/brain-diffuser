@@ -12,7 +12,7 @@ import time
 import copy
 import torch
 import torch.distributed as dist
-from lib.cfg_holder import cfg_unique_holder as cfguh
+from versatile_diffusion.lib.cfg_holder import cfg_unique_holder as cfguh
 
 def singleton(class_):
     instances = {}
